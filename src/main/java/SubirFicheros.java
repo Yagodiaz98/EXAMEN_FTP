@@ -3,6 +3,7 @@ import org.apache.commons.net.ftp.FTPClient;
 
 import javax.swing.*;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
@@ -48,6 +49,22 @@ public class SubirFicheros {
                         case 2:
                             SubirFicheroFileChooser();
                             break;
+                        case 3:
+                            System.out.println("Escribe la ruta de la carpeta que quieres subir");
+                            String ruta= sc.nextLine();
+                            String rutaBarras=ruta.replace("\\", "\\\\");
+                            File carpeta=new File(rutaBarras);
+                            String[] listado=carpeta.list();
+                            if (listado == null || listado.length==0){
+                                System.out.println("La carpeta está vacía");
+                                return;
+                            }else{
+                                for (int i=0; i< listado.length;i++){
+                                    System.out.println(listado[i]);
+                                    SubirFicheroRuta(rutaBarras+"\\"+listado[i],listado[i]);
+                                }
+                            }
+                            break;
                     }
 
             }
@@ -86,8 +103,7 @@ public class SubirFicheros {
             String directorio = "NUEVODIREC";
             //Aquí lo crea
             if (cliente.makeDirectory(directorio)) {
-                System.out.println("Directorio :  " +
-                        directorio + " creado ...");
+                System.out.println("Directorio :  " + directorio + " creado ...");
                 cliente.changeWorkingDirectory(directorio);//Aquí como ya está creado se cambia
             } else {
                 System.out.println("No se ha podido crear el Directorio");
@@ -95,18 +111,16 @@ public class SubirFicheros {
             }
 
         }
+        //Muestro el directorio actual del FTP
+        System.out.println("Directorio actual: " +  cliente.printWorkingDirectory());
     }
     public static void SubirFicheroNombre(String nombreArchivo) throws IOException{
         String direc = "/NUEVODIREC"; //Se indica directorio destino
 
         crearDirectorio(direc);
 
-        System.out.println("Directorio actual: " +
-                cliente.printWorkingDirectory());
-
         String archivo ="C:\\Users\\llago\\Desktop\\Prueba_PSP\\"+nombreArchivo;
-        BufferedInputStream in = new BufferedInputStream
-                (new FileInputStream(archivo));
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(archivo));
 
         if (cliente.storeFile(nombreArchivo, in))
             System.out.println("Subido correctamente... ");
@@ -122,9 +136,6 @@ public class SubirFicheros {
         String direc = "/NUEVODIREC";
 
         crearDirectorio(direc);
-
-        //Muestro el directorio actual del FTP
-        System.out.println("Directorio actual: " +  cliente.printWorkingDirectory());
 
         //Creo y abro un file chooser para leer el archivo de mi ordenador que quiero subir al FTP
         JFileChooser fileChooser = new JFileChooser();
@@ -143,7 +154,7 @@ public class SubirFicheros {
 
         //Guardo el contenido del archivo rutaynombre en un buffer
         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(rutaynombre));
-        
+
         //Estas dos lineas comentadas son lo mismo que la liena de arriba para coger solo el nombre
 
         /*String[] arrayarchivo=archivo.split("\\\\");
@@ -154,9 +165,28 @@ public class SubirFicheros {
             System.out.println("Subido correctamente... ");
         else
             System.out.println("No se ha podido subir el fichero... ");
+
         bis.close(); // Cerrar flujo
         cliente.logout();
         cliente.disconnect();
+    }
 
+    public static void SubirFicheroRuta(String ruta,String nombre) throws IOException{
+        iniciarSesion();//Porque es necesario iniciar sesion aqui¿?¿?¿? Si lo quito solo pasa un archivo porque cierra sesion antes de pasar al 2º
+        String direc = "/NUEVODIREC"; //Se indica directorio destino
+
+        crearDirectorio(direc);
+
+        String archivo =ruta;
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(ruta));
+
+        if (cliente.storeFile(nombre, in))
+            System.out.println("Subido correctamente... ");
+        else
+            System.out.println("No se ha podido subir el fichero... ");
+
+        in.close(); // Cerrar flujo
+        cliente.logout();
+        cliente.disconnect();
     }
 }
