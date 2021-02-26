@@ -41,13 +41,13 @@ public class SubirFicheros {
                             while (contador < numveces) {
                                 System.out.println("Dime el nombre del archivo que se suba");
                                 String nombre = sc.nextLine();
-                                SubirFicheroNombre(nombre);
+                                subirFicheroNombre(nombre);
                                 contador++;
 
                             }
                             break;
                         case 2:
-                            SubirFicheroFileChooser();
+                            subirFicheroFileChooser();
                             break;
                         case 3:
                             System.out.println("Escribe la ruta de la carpeta que quieres subir");
@@ -61,7 +61,7 @@ public class SubirFicheros {
                             }else{
                                 for (int i=0; i< listado.length;i++){
                                     System.out.println(listado[i]);
-                                    SubirFicheroRuta(rutaBarras+"\\"+listado[i],listado[i]);
+                                    subirFicheroRuta(rutaBarras+"\\"+listado[i],listado[i]);
                                 }
                             }
                             break;
@@ -97,6 +97,11 @@ public class SubirFicheros {
         }
     }
 
+    public static void cerrarSesion() throws IOException{
+        cliente.logout();
+        cliente.disconnect();
+    }
+
     public static void crearDirectorio(String direc) throws IOException{//Para crear el directorio en la carpeta del FileZilla
         //Si no puede cambiarse al directorio nuevodirec
         if (!cliente.changeWorkingDirectory(direc)) {
@@ -114,7 +119,9 @@ public class SubirFicheros {
         //Muestro el directorio actual del FTP
         System.out.println("Directorio actual: " +  cliente.printWorkingDirectory());
     }
-    public static void SubirFicheroNombre(String nombreArchivo) throws IOException{
+    public static void subirFicheroNombre(String nombreArchivo) throws IOException{
+        iniciarSesion();//Iniciamos sesion ya que cuando el bucle se hace mas de 1 vez, la sesion se cierra antes
+
         String direc = "/NUEVODIREC"; //Se indica directorio destino
 
         crearDirectorio(direc);
@@ -128,11 +135,10 @@ public class SubirFicheros {
             System.out.println("No se ha podido subir el fichero... ");
 
         in.close(); // Cerrar flujo
-        cliente.logout();
-        cliente.disconnect();
+        cerrarSesion();
     }
 
-    public static void SubirFicheroFileChooser() throws IOException{
+    public static void subirFicheroFileChooser() throws IOException{
         String direc = "/NUEVODIREC";
 
         crearDirectorio(direc);
@@ -153,7 +159,7 @@ public class SubirFicheros {
         System.out.println(rutaynombre);
 
         //Guardo el contenido del archivo rutaynombre en un buffer
-        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(rutaynombre));
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(rutaynombre));
 
         //Estas dos lineas comentadas son lo mismo que la liena de arriba para coger solo el nombre
 
@@ -161,17 +167,16 @@ public class SubirFicheros {
         String archivoDestino=arrayarchivo[arrayarchivo.length-1];*/
 
         //Almaceno el contenido del buffer en el servidor FTP
-        if (cliente.storeFile(nombresinruta, bis))
+        if (cliente.storeFile(nombresinruta, in))
             System.out.println("Subido correctamente... ");
         else
             System.out.println("No se ha podido subir el fichero... ");
 
-        bis.close(); // Cerrar flujo
-        cliente.logout();
-        cliente.disconnect();
+        in.close(); // Cerrar flujo
+        cerrarSesion();
     }
 
-    public static void SubirFicheroRuta(String ruta,String nombre) throws IOException{
+    public static void subirFicheroRuta(String ruta,String nombre) throws IOException{
         iniciarSesion();//Porque es necesario iniciar sesion aqui¿?¿?¿? Si lo quito solo pasa un archivo porque cierra sesion antes de pasar al 2º
         String direc = "/NUEVODIREC"; //Se indica directorio destino
 
@@ -186,7 +191,6 @@ public class SubirFicheros {
             System.out.println("No se ha podido subir el fichero... ");
 
         in.close(); // Cerrar flujo
-        cliente.logout();
-        cliente.disconnect();
+        cerrarSesion();
     }
 }
