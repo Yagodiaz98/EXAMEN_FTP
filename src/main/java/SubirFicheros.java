@@ -2,10 +2,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 import javax.swing.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
 
 public class SubirFicheros {
@@ -31,7 +28,6 @@ public class SubirFicheros {
                     System.out.println("Pulsa 2 para subir fichero con file chooser");
                     System.out.println("Pulsa 3 para subir toda la carpeta pasando ruta");
                     System.out.println("Pulsa 4 para subir fichero con un nombre diferente");
-                    sc = new Scanner(System.in);
                     decision2=Integer.parseInt(sc.nextLine());
                     switch (decision2){
                         case 1:
@@ -71,10 +67,30 @@ public class SubirFicheros {
                             rutaBarras=ruta.replace("\\", "\\\\");
                             System.out.println("Dime el nombre del archivo que se suba");
                             String nombre = sc.nextLine();
-                            SubirFicheroCambiandoNombre(rutaBarras,nombre);
+                            subirFicheroCambiandoNombre(rutaBarras,nombre);
                             break;
                     }
+                case 2:
+                    System.out.println("Pulsa 1 para descargar fichero pasandole el nombre");
+                    System.out.println("Pulsa 2 para descargar fichero con file chooser");
+                    System.out.println("Pulsa 3 para descargar toda la carpeta");
+                    System.out.println("Pulsa 4 para descargar fichero y guardarlo con un nombre diferente");
+                    decision2=Integer.parseInt(sc.nextLine());
+                    switch (decision2){
+                        case 1:
+                            System.out.println("¿Cuántos archivos quieres descargar?");
+                            int numveces = Integer.parseInt(sc.nextLine());
 
+                            int contador = 0;
+
+                            while (contador < numveces) {
+                                System.out.println("Dime el nombre del archivo que quieres descargar");
+                                String nombre = sc.nextLine();
+                                descargarFicheroNombre(nombre);
+                                contador++;
+                            }
+                            break;
+                    }
             }
         }
 
@@ -201,7 +217,7 @@ public class SubirFicheros {
         in.close(); // Cerrar flujo
         cerrarSesion();
     }
-    public static void SubirFicheroCambiandoNombre(String ruta,String nombre) throws IOException{
+    public static void subirFicheroCambiandoNombre(String ruta,String nombre) throws IOException{
 
         String direc = "/NUEVODIREC"; //Se indica directorio destino
 
@@ -220,4 +236,28 @@ public class SubirFicheros {
         in.close(); // Cerrar flujo
         cerrarSesion();
     }
+
+    public static void descargarFicheroNombre(String nombre)throws IOException{//No entiendo porque s va yvuelve al bucle antes de imprimir que el fichero no existe en el server
+        iniciarSesion();
+
+        //descargar fichero
+        String direc = "/Nuevo";
+        if(cliente.changeWorkingDirectory(direc)){
+            //stream de salida para recibir el fichero descargado
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream("C:\\Users\\llago\\Desktop\\Prueba_PSP\\"+nombre));
+
+            if(cliente.retrieveFile(nombre, out))
+                System.out.println("Recuperado correctamente... ");
+            else
+                System.out.println("No se ha podido descargar... ");
+
+            out.close();
+
+            cerrarSesion();
+        }else{
+            System.out.println("No existe el fichero especificado en código en el servidor");
+        }
+
+    }
+
 }
