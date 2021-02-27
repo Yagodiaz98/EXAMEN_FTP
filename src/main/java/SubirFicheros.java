@@ -1,8 +1,12 @@
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class SubirFicheros {
@@ -72,9 +76,9 @@ public class SubirFicheros {
                     }
                 case 2:
                     System.out.println("Pulsa 1 para descargar fichero pasandole el nombre");
-                    System.out.println("Pulsa 2 para descargar fichero con file chooser");
-                    System.out.println("Pulsa 3 para descargar toda la carpeta");
-                    System.out.println("Pulsa 4 para descargar fichero y guardarlo con un nombre diferente");
+                    System.out.println("Pulsa 2 para descargar fichero entero y decidir con FileChooser donde descargarlo");
+                    //System.out.println("Pulsa 3 para descargar toda la carpeta");
+                    //System.out.println("Pulsa 4 para descargar fichero y guardarlo con un nombre diferente");
                     decision2=Integer.parseInt(sc.nextLine());
                     switch (decision2){
                         case 1:
@@ -89,6 +93,9 @@ public class SubirFicheros {
                                 descargarFicheroNombre(nombre);
                                 contador++;
                             }
+                            break;
+                        case 2:
+                            descargarDirectorioEnteroFileChooser();
                             break;
                     }
             }
@@ -127,7 +134,7 @@ public class SubirFicheros {
     }
 
     public static void crearDirectorio(String direc) throws IOException{//Para crear el directorio en la carpeta del FileZilla
-        //Si no puede cambiarse al directorio nuevodirec
+        //Si no puede cambiarse al directorio direc
         if (!cliente.changeWorkingDirectory(direc)) {
             String directorio = "NUEVODIREC";
             //Aquí lo crea
@@ -260,4 +267,44 @@ public class SubirFicheros {
 
     }
 
+    public static void descargarDirectorioEnteroFileChooser()throws IOException{
+        iniciarSesion();
+
+        FTPFile[] ficheros = cliente.listFiles();
+        System.out.println(Arrays.toString(ficheros));
+
+        System.out.println("Ficheros en la raiz: ");
+        for(FTPFile fichero :ficheros){//QUE HACEN LOS ":" ¿?¿?¿?¿?¿?¿¿?¿?
+            System.out.println(fichero.getName());
+        }
+        if (ficheros == null || ficheros.length == 0) {
+            System.out.println("No hay elementos dentro de la carpeta actual");
+            return;
+        } else {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fileChooser.showOpenDialog(fileChooser);
+            String ruta="";
+            //Guardo la ruta completa + el nombre del archivo que ha seleccionado el usuario
+            ruta = fileChooser.getCurrentDirectory().getAbsolutePath();
+
+            //En la rutaynombre cambio las contrabarras por dobles contrabarras
+            ruta=ruta.replace("\\", "\\\\");
+
+            //crearDirectorio(ruta);//Comentando esta linea deniega el acceso igualmente
+
+            for (int i=0; i< ficheros.length; i++) {
+                System.out.println(ficheros[i].getName());
+
+                BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(ruta+"\\"+ficheros[i].getName()));//RUTA DE DESTINO DEL ARCHIVO CON SU NOMBRE
+
+                if(cliente.retrieveFile(ficheros[i].getName(), out))
+                    System.out.println("Recuperado correctamente... ");
+                else
+                    System.out.println("No se ha podido descargar... ");
+
+                out.close();
+            }
+        }
+    }
 }
