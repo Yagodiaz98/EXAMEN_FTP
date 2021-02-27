@@ -14,6 +14,7 @@ public class SubirFicheros {
     public static boolean login;
     public static int decision1;
     public static int decision2;
+    public static Scanner sc = new Scanner(System.in);
 
 
     public static void main(String[] arg) throws Exception{
@@ -22,7 +23,6 @@ public class SubirFicheros {
             System.out.println("¿Qué quieres hacer?");
             System.out.println("1.- Subir fichero");
             System.out.println("2.- Descargar fichero");
-            Scanner sc = new Scanner(System.in);
             decision1= Integer.parseInt(sc.nextLine());
 
             switch(decision1){
@@ -64,6 +64,14 @@ public class SubirFicheros {
                                     subirFicheroRuta(rutaBarras+"\\"+listado[i],listado[i]);
                                 }
                             }
+                            break;
+                        case 4:
+                            System.out.println("Introduce la ruta del archivo que quieres subir");
+                            ruta= sc.nextLine();
+                            rutaBarras=ruta.replace("\\", "\\\\");
+                            System.out.println("Dime el nombre del archivo que se suba");
+                            String nombre = sc.nextLine();
+                            SubirFicheroCambiandoNombre(rutaBarras,nombre);
                             break;
                     }
 
@@ -186,6 +194,25 @@ public class SubirFicheros {
         BufferedInputStream in = new BufferedInputStream(new FileInputStream(ruta));
 
         if (cliente.storeFile(nombre, in))
+            System.out.println("Subido correctamente... ");
+        else
+            System.out.println("No se ha podido subir el fichero... ");
+
+        in.close(); // Cerrar flujo
+        cerrarSesion();
+    }
+    public static void SubirFicheroCambiandoNombre(String ruta,String nombre) throws IOException{
+
+        String direc = "/NUEVODIREC"; //Se indica directorio destino
+
+        crearDirectorio(direc);
+
+        String archivo =ruta+"\\"+nombre;
+        BufferedInputStream in = new BufferedInputStream (new FileInputStream(archivo));
+        //String nuevoNombre=JOptionPane.showInputDialog("Dime el nuevo nombre para guardar el archivo");
+        System.out.println("Dime el nombre que quieres que se le aplique al archivo");
+        String nuevoNombre=sc.nextLine();
+        if (cliente.storeFile(nuevoNombre, in))
             System.out.println("Subido correctamente... ");
         else
             System.out.println("No se ha podido subir el fichero... ");
