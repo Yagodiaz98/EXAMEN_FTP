@@ -306,5 +306,6 @@ public class SubirFicheros {
                 out.close();
             }
         }
+        cerrarSesion();
     }
 }
